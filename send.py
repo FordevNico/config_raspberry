@@ -20,8 +20,19 @@ logger = get_logger()
 def cargar_batches(path):
     if not os.path.exists(path):
         return []
+    batches = []
     with open(path, "r") as f:
-        return [json.loads(line) for line in f if line.strip()]
+        for line_num, line in enumerate(f, 1):
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                batches.append(json.loads(line))
+            except json.JSONDecodeError as e:
+                logger.warning(f"Línea {line_num} inválida en {path}: {e}")
+                logger.warning(f"Contenido problemático: {line[:100]}...")
+                continue
+    return batches
 
 
 def chunkify(data, size):
